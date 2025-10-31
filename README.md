@@ -133,7 +133,7 @@ Brain-Tumour-Detection-using-DeepLearning/
 
 This project uses publicly available brain MRI datasets:
 
-- **Dataset Source**: [Brain Tumor MRI Dataset](https://www.kaggle.com/datasets/)
+- **Dataset Source**: [Brain Tumor MRI Dataset]([https://www.kaggle.com/datasets/](https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset/code))
 - **Classes**: 
   - Glioma
   - Meningioma
@@ -242,3 +242,4 @@ For questions, suggestions, or collaboration opportunities, please:
 <div align="center">
   <strong>⭐ If you find this project useful, please consider giving it a star! ⭐</strong>
 </div>
+
