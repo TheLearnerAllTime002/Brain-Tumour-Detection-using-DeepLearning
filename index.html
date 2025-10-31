@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Tumor AI Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      color: #2a294f;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .bg-gradient {
+      position: fixed;
+      top:0; left:0; width:100vw; height:100vh;
+      z-index: -1;
+      background: linear-gradient(120deg, #A1C4FD 0%, #C2E9FB 50%, #fbc2eb 100%);
+    }
+    .bg-img {
+      position: fixed;
+      top:0; left:0; width:100vw; height:100vh;
+      z-index: -2;
+      background: url('https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1000&q=80') center/cover no-repeat;
+      filter: blur(24px) brightness(0.92);
+      opacity: 0.28;
+      pointer-events: none;
+    }
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .glass-card {
+      background: rgba(255,255,255,0.73);
+      box-shadow: 0 4px 32px 0 rgba(80,40,120,0.09), 0 0px 0px 1px #A1C4FD12;
+      border-radius: 26px;
+      max-width: 430px;
+      width: 98vw;
+      margin: 24px;
+      padding: 38px 30px 28px 30px;
+      text-align: center;
+      backdrop-filter: blur(6px);
+      animation: fadeUp 1.1s;
+      transition: box-shadow 0.22s;
+    }
+    .glass-card:hover {
+      box-shadow: 0 10px 38px 0 rgba(80,40,120,0.16);
+    }
+    .title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #2377b7;
+      letter-spacing: 1px;
+      margin-bottom: .5rem;
+    }
+    .subtitle {
+      font-size: 1.13rem;
+      font-weight: 500;
+      color: #63738c;
+      margin-bottom: 1.8rem;
+    }
+
+    /* Drag box styles */
+    .drop-area {
+      background: rgba(190,226,255,0.7);
+      border: 2.5px dashed #2377b7;
+      border-radius: 16px;
+      padding: 38px 30px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.2s;
+      font-size: 1.1rem;
+      color: #2377b7;
+      position: relative;
+      animation: fadeIn 1.2s;
+    }
+    .drop-area.dragover {
+      background: linear-gradient(100deg, #FDCDFF 0%, #A1C4FD 100%);
+      border-color: #753b90;
+      color: #753b90;
+    }
+    .drop-area input[type="file"] {
+      display: none;
+    }
+    .preview-img {
+      max-width: 260px;
+      max-height: 200px;
+      margin: 16px auto 9px;
+      display: block;
+      border-radius: 13px;
+      box-shadow: 0 1px 12px rgba(50,100,180,0.09);
+      animation: fadeInImg 1s;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(38px);}
+      to   { opacity: 1; transform: translateY(0);}
+    }
+    @keyframes fadeInImg {
+      from { opacity: 0; transform: scale(.8);}
+      to   { opacity: 1; transform: scale(1);}
+    }
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+
+    .analyze-btn {
+      background: linear-gradient(90deg, #2377b7 0%, #753b90 100%);
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 11px;
+      padding: 13px 57px;
+      font-size: 1.12rem;
+      cursor: pointer;
+      box-shadow: 0 4px 13px #A1C4FD11;
+      margin: 16px 0 10px 0;
+      transition: background 0.3s, transform 0.18s;
+      outline: none;
+    }
+    .analyze-btn:active {
+      transform: scale(.97);
+    }
+    .analyze-btn:focus {
+      box-shadow: 0 0 0 3px #C2E9FB;
+    }
+
+    .result-section {
+      background: rgba(255,255,255,0.92);
+      border-radius: 15px;
+      padding: 28px 19px 18px 19px;
+      box-shadow: 0 3px 18px rgba(40,60,120,0.10);
+      margin-top: 14px;
+      animation: fadeIn 1s;
+      text-align: left;
+      width: 97%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .result-title {
+      font-weight: 600;
+      font-size: 1.24rem;
+      color: #2377b7;
+      margin-bottom: 7px;
+    }
+    .result-type {
+      font-weight: 500;
+      font-size: 1.09rem;
+      margin-bottom: 3px;
+    }
+    .result-high { color: #e95368; }
+    .result-medium { color: #f0b923; }
+    .result-low { color: #2aad4b; }
+
+    .result-confidence {
+      font-size: .98rem;
+      color: #76829a;
+    }
+    .footer {
+      margin-top: 32px;
+      color: #789;
+      text-align: center;
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: 1rem;
+      padding: .8rem 10px;
+      opacity: .80;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-img"></div>
+  <div class="bg-gradient"></div>
+  <div class="container">
+    <div class="glass-card">
+      <div class="title">Brain Tumor AI Detection</div>
+      <div class="subtitle">Upload your MRI scan for instant, AI-powered analysis. <br>Modern, secure & private. 
+      </div>
+      <!-- Drag & drop/upload box -->
+      <form id="aiForm">
+        <div class="drop-area" id="dropArea">
+          <span id="dropText">Drag & drop MRI image here, or <b>click to choose</b></span>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+        <img id="imgPreview" class="preview-img" style="display:none;">
+        <button type="submit" class="analyze-btn">Analyze Image</button>
+      </form>
+      <div id="resultBox"></div>
+    </div>
+    <div class="result-section" style="margin-top:30px;max-width:430px;">
+      <b class="result-title">User Guide</b>
+      <ul>
+        <li>Drop or select an MRI image (.jpg, .png)</li>
+        <li>Press "Analyze Image" to run AI detection</li>
+        <li>Results will show prediction, risk level & confidence</li>
+        <li><span style="color:#e95368;"><b>Important:</b></span> AI results are informational only. <u>See a medical professional for diagnosis!</u></li>
+      </ul>
+    </div>
+    <div class="result-section" style="margin-top:18px;max-width:430px;">
+      <b class="result-title">Risk Levels & Possible Cures</b>
+      <ul style="margin-bottom:0;">
+        <li><b class="result-high">High risk:</b> Possible malignancy—urgent care. <span style="color:#839;">Treatments: Surgery, radiotherapy, chemotherapy</span></li>
+        <li><b class="result-medium">Medium risk:</b> Review with doctor soon. <span style="color:#839;">Treatments: Often similar, prognosis better</span></li>
+        <li><b class="result-low">Low risk:</b> Likely benign, follow up always required.</li>
+        <li><b>No tumor:</b> All clear. Consult doctor if symptoms persist.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer">&copy; 2025 NeuroDetect — AI Health Toolkit</div>
+  <script>
+    // Animations for drag & drop
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const dropText = document.getElementById('dropText');
+    const imgPreview = document.getElementById('imgPreview');
+    const aiForm = document.getElementById('aiForm');
+    const resultBox = document.getElementById('resultBox');
+
+    function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        preventDefaults(e);
+        dropArea.classList.add('dragover');
+        dropText.textContent = "Release image to upload";
+      }, false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropArea.addEventListener(eventName, (e) => {
+        preventDefaults(e);
+        dropArea.classList.remove('dragover');
+        dropText.innerHTML = "Drag & drop MRI image here, or <b>click to choose</b>";
+      }, false);
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files[0]) {
+        fileInput.files = files;
+        previewImage(files[0]);
+      }
+    });
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        previewImage(e.target.files[0]);
+      }
+    });
+    function previewImage(file) {
+      imgPreview.style.display = "block";
+      imgPreview.src = URL.createObjectURL(file);
+    }
+
+    // Simulated AI prediction with smooth card animation
+    aiForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      resultBox.innerHTML = "";
+      if (!fileInput.files[0]) {
+        alert("Please upload an MRI image.");
+        return;
+      }
+      // Simulate AI analysis loader
+      resultBox.innerHTML = `<div class="result-section" style="animation:fadeIn .6s;">Analyzing... <span style="font-size:1.6em;">⏳</span></div>`;
+      setTimeout(()=>{
+        let results = [
+          {
+            name:"No Tumor Detected", risk:"Low", riskClass:"result-low", confidence:"98%"
+          },
+          {
+            name:"Glioma Detected", risk:"High", riskClass:"result-high", confidence:"95%"
+          },
+          {
+            name:"Meningioma Detected", risk:"Medium", riskClass:"result-medium", confidence:"90%"
+          },
+          {
+            name:"Pituitary Tumor Detected", risk:"Medium", riskClass:"result-medium", confidence:"91%"
+          }
+        ];
+        let res = results[Math.floor(Math.random()*results.length)];
+        resultBox.innerHTML = `
+          <div class="result-section" style="animation:fadeIn .7s;">
+            <div class="result-type ${res.riskClass}">${res.name}</div>
+            <div class="result-confidence">Confidence: <b>${res.confidence}</b></div>
+            <div class="result-type ${res.riskClass}">Risk Level: <b>${res.risk}</b></div>
+            <div style="margin-top:7px; color:#2377b7;">Consult your doctor for further action.</div>
+          </div>
+        `;
+      }, 1650);
+    });
+  </script>
+</body>
+</html>
